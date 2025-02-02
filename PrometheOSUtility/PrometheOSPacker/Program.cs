@@ -7,7 +7,7 @@ namespace PrometheOSPacker
     {
         static async Task<bool> DownloadFileAsync(string url, string filename)
         {
-            const bool offline = false;
+            const bool offline = true;
             if (offline)
             {
                 try
@@ -46,32 +46,11 @@ namespace PrometheOSPacker
 
             var baseUrl = $"https://github.com/Team-Resurgent/Modxo/releases/download/{version}";
 
-            Console.WriteLine("Downloading 'modxo-official-pico.bin'.");
-            if (DownloadFileAsync($"{baseUrl}/modxo_official_pico.bin", "modxo-official-pico.bin").GetAwaiter().GetResult() == false)
+            Console.WriteLine("Downloading 'modxo-bsx.bin'.");
+            if (DownloadFileAsync($"{baseUrl}/modxo_bsx.bin", "modxo-bsx.bin").GetAwaiter().GetResult() == false)
             {
                 return;
             }
-            Console.WriteLine("Downloading 'modxo-official-pico2.bin'.");
-            if (DownloadFileAsync($"{baseUrl}/modxo_official_pico2.bin", "modxo-official-pico2.bin").GetAwaiter().GetResult() == false)
-            {
-                return;
-            }
-            Console.WriteLine("Downloading 'modxo-yd-rp2040.bin'.");
-            if (DownloadFileAsync($"{baseUrl}/modxo_yd_rp2040.bin", "modxo-yd-rp2040.bin").GetAwaiter().GetResult() == false)
-            {
-                return;
-            }
-            Console.WriteLine("Downloading 'modxo-rp2040-zero-tiny.bin'.");
-            if (DownloadFileAsync($"{baseUrl}/modxo_rp2040_zero_tiny.bin", "modxo-rp2040-zero-tiny.bin").GetAwaiter().GetResult() == false)
-            {
-                return;
-            }
-            Console.WriteLine("Downloading 'modxo-xiao-rp2040.bin'.");
-            if (DownloadFileAsync($"{baseUrl}/modxo_xiao_rp2040.bin", "modxo-xiao-rp2040.bin").GetAwaiter().GetResult() == false)
-            {
-                return;
-            }
-
             var prometheosWebTestIp = "192.168.1.66"; // If you change ip in PrometheOSWeb update here
 
             Console.WriteLine("1) Updating embeded web files in XBE...");
@@ -85,47 +64,13 @@ namespace PrometheOSPacker
 
             Console.WriteLine("3) Packaging PrometheOSTools and PrometheOS firmware for each modchip...");
 
-            Package.PackageTools();
-
             var modchips = new string[]
             {
-                "Aladdin1mb",
-                "Aladdin2mb",
-                "Xenium",
-                "Xecuter",
-                "Xchanger",
-                "Aladdin1mb",
-                "Aladdin2mb",
                 "Modxo",
             };
 
             foreach (var modchip in modchips)
             {
-                if (modchip.Equals("Xenium", StringComparison.CurrentCultureIgnoreCase))
-                {
-                    Package.PackageXenium(modchip);
-                }
-
-                if (modchip.Equals("Xecuter", StringComparison.CurrentCultureIgnoreCase))
-                {
-                    Package.PackageXecuter(modchip);
-                }
-
-                if (modchip.Equals("Xchanger", StringComparison.CurrentCultureIgnoreCase))
-                {
-                    Package.PackageXchanger(modchip);
-                }
-
-                if (modchip.Equals("Aladdin1mb", StringComparison.CurrentCultureIgnoreCase))
-                {
-                    Package.PackageAladdin1mb(modchip);
-                }
-
-                if (modchip.Equals("Aladdin2mb", StringComparison.CurrentCultureIgnoreCase))
-                {
-                    Package.PackageAladdin2mb(modchip);
-                }
-
                 if (modchip.Equals("Modxo", StringComparison.CurrentCultureIgnoreCase))
                 {
                     Package.PackageModxo(modchip);
