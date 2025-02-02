@@ -69,36 +69,6 @@ namespace PrometheOSPacker.Helpers
             var prometheosSource = File.ReadAllBytes(prometheosSourcePath);
             var firmware = new byte[256 * 1024];
 
-            if (modchip.Equals("Xenium", StringComparison.CurrentCultureIgnoreCase))
-            {
-                Array.Copy(prometheosSource, 0x180000, firmware, 0, 256 * 1024);
-                return firmware;
-            }
-
-            if (modchip.Equals("Xecuter", StringComparison.CurrentCultureIgnoreCase))
-            {
-                Array.Copy(prometheosSource, 0x000000, firmware, 0, 256 * 1024);
-                return firmware;
-            }
-
-            if (modchip.Equals("Xchanger", StringComparison.CurrentCultureIgnoreCase))
-            {
-                Array.Copy(prometheosSource, 0x0C0000, firmware, 0, 256 * 1024);
-                return firmware;
-            }
-
-            if (modchip.Equals("Aladdin1mb", StringComparison.CurrentCultureIgnoreCase))
-            {
-                Array.Copy(prometheosSource, 0x0C0000, firmware, 0, 256 * 1024);
-                return firmware;
-            }
-
-            if (modchip.Equals("Aladdin2mb", StringComparison.CurrentCultureIgnoreCase))
-            {
-                Array.Copy(prometheosSource, 0x100000, firmware, 0, 256 * 1024);
-                return firmware;
-            }
-
             if (modchip.StartsWith("Modxo", StringComparison.CurrentCultureIgnoreCase))
             {
                 Array.Copy(prometheosSource, 0x040000, firmware, 0, 256 * 1024);
@@ -106,97 +76,6 @@ namespace PrometheOSPacker.Helpers
             }
 
             throw new Exception($"Failed: Unrecognized modchip {modchip}.");
-        }
-
-        public static void PackageTools()
-        {
-            var slnFolder = Utility.GetSlnFolder();
-            var promethosToolsXbePath = Path.GetFullPath($"..\\PrometheOSXbe\\PrometheOSXbe\\Release-Tools\\PrometheOS-Tools.xbe", slnFolder);
-            var tools = File.ReadAllBytes(promethosToolsXbePath);
-
-            var buildPath = Path.Combine(slnFolder, "..\\Build");
-            Directory.CreateDirectory(buildPath);
-            File.WriteAllBytes(Path.Combine(buildPath, $"prometheos-tools.xbe"), tools);
-        }
-
-        public static void PackageXenium(string modchip)
-        {
-            var slnFolder = Utility.GetSlnFolder();
-            var prometheos = ExtractPrometheOS(modchip);
-
-            var promethosXbePath = Path.GetFullPath($"..\\PrometheOSXbe\\PrometheOSXbe\\Release-{modchip}\\PrometheOS.xbe", slnFolder);
-            if (File.Exists(promethosXbePath) == false)
-            {
-                Console.WriteLine("Error: Looks like you didnt build PrometheOSXbe.");
-                return;
-            }
-
-            Console.WriteLine("Packing PrometheOS Xbe...");
-            var promethosxbeBank = CompressBank(promethosXbePath, (512 + 96) * 1024);
-
-            var firmware = new byte[2048 * 1024];
-            Array.Copy(promethosxbeBank, 0, firmware, 0x100000, 512 * 1024);
-            Array.Copy(promethosxbeBank, 512 * 1024, firmware, 0x1e0000, 96 * 1024);
-            Array.Copy(prometheos, 0, firmware, 0x180000, prometheos.Length);
-
-            //var logo = GetInstallerLogo();
-            //Array.Copy(logo, 0, firmware, 0x1F0000 , logo.Length);
-
-            var buildPath = Path.Combine(slnFolder, "..\\Build");
-            Directory.CreateDirectory(buildPath);
-            File.WriteAllBytes(Path.Combine(buildPath, $"prometheos-{modchip.ToLower()}.bin"), firmware);
-        }
-
-        public static void PackageXecuter(string modchip)
-        {
-            var slnFolder = Utility.GetSlnFolder();
-            var prometheos = ExtractPrometheOS(modchip);
-
-            var promethosXbePath = Path.GetFullPath($"..\\PrometheOSXbe\\PrometheOSXbe\\Release-{modchip}\\PrometheOS.xbe", slnFolder);
-            if (File.Exists(promethosXbePath) == false)
-            {
-                Console.WriteLine("Error: Looks like you didnt build PrometheOSXbe.");
-                return;
-            }
-
-            Console.WriteLine("Packing PrometheOS Xbe...");
-            var promethosxbeBank = CompressBank(promethosXbePath, 655360);
-
-            var firmware = new byte[2048 * 1024];
-            Array.Copy(promethosxbeBank, 0, firmware, 0x040000, promethosxbeBank.Length);
-            Array.Copy(prometheos, 0, firmware, 0x000000, prometheos.Length);
-
-            //var logo = GetInstallerLogo();
-            //Array.Copy(logo, 0, firmware, 0x0e0000 , logo.Length);
-
-            var buildPath = Path.Combine(slnFolder, "..\\Build");
-            Directory.CreateDirectory(buildPath);
-            File.WriteAllBytes(Path.Combine(buildPath, $"prometheos-{modchip.ToLower()}.bin"), firmware);
-        }
-
-        public static void PackageXchanger(string modchip)
-        {
-            var slnFolder = Utility.GetSlnFolder();
-            var prometheos = ExtractPrometheOS(modchip);
-
-            var promethosXbePath = Path.GetFullPath($"..\\PrometheOSXbe\\PrometheOSXbe\\Release-{modchip}\\PrometheOS.xbe", slnFolder);
-            if (File.Exists(promethosXbePath) == false)
-            {
-                Console.WriteLine("Error: Looks like you didnt build PrometheOSXbe.");
-                return;
-            }
-
-            Console.WriteLine("Packing PrometheOS Xbe...");
-            var promethosxbeBank = CompressBank(promethosXbePath, 508 * 1024);
-
-            var firmware = new byte[1024 * 1024];
-            Array.Copy(promethosxbeBank, 0, firmware, 0x000000, 508 * 1024);
-            Array.Copy(prometheos, 0, firmware, 0x0C0000, prometheos.Length);
-
-
-            var buildPath = Path.Combine(slnFolder, "..\\Build");
-            Directory.CreateDirectory(buildPath);
-            File.WriteAllBytes(Path.Combine(buildPath, $"prometheos-{modchip.ToLower()}.bin"), firmware);
         }
 
         private static void PackageModxoVariant(byte[] prometheos, string variant, string modchip, uint familyId)
@@ -234,79 +113,7 @@ namespace PrometheOSPacker.Helpers
             var prometheos = ExtractPrometheOS($"{modchip}-official-pico");
             uint defaultFamilyId = 0xE48BFF56;
 
-            PackageModxoVariant(prometheos, "official-pico", modchip, defaultFamilyId);
-            PackageModxoVariant(prometheos, "official-pico2", modchip, 0xE48BFF59);
-            PackageModxoVariant(prometheos, "rp2040-zero-tiny", modchip, defaultFamilyId);
-            PackageModxoVariant(prometheos, "yd-rp2040", modchip, defaultFamilyId);
-            PackageModxoVariant(prometheos, "xiao-rp2040", modchip, defaultFamilyId);
-        }
-
-        public static void PackageAladdin1mb(string modchip)
-        {
-            var slnFolder = Utility.GetSlnFolder();
-            var prometheos = ExtractPrometheOS(modchip);
-
-            var promethosXbePath = Path.GetFullPath($"..\\PrometheOSXbe\\PrometheOSXbe\\Release-{modchip}\\PrometheOS.xbe", slnFolder);
-            if (File.Exists(promethosXbePath) == false)
-            {
-                Console.WriteLine("Error: Looks like you didnt build PrometheOSXbe.");
-                return;
-            }
-
-            Console.WriteLine("Packing PrometheOS Xbe...");
-            var promethosxbeBank = CompressBank(promethosXbePath, 508 * 1024);
-
-            var firmware = new byte[1024 * 1024];
-            Array.Copy(promethosxbeBank, 0, firmware, 0x000000, 508 * 1024);
-            Array.Copy(prometheos, 0, firmware, 0x0C0000, prometheos.Length);
-
-            var buildPath = Path.Combine(slnFolder, "..\\Build");
-            Directory.CreateDirectory(buildPath);
-            File.WriteAllBytes(Path.Combine(buildPath, $"prometheos-{modchip.ToLower()}.bin"), firmware);
-        }
-
-        public static void PackageAladdin2mb(string modchip)
-        {
-            var slnFolder = Utility.GetSlnFolder();
-            var prometheos = ExtractPrometheOS(modchip);
-
-            var promethosXbePath = Path.GetFullPath($"..\\PrometheOSXbe\\PrometheOSXbe\\Release-{modchip}\\PrometheOS.xbe", slnFolder);
-            if (File.Exists(promethosXbePath) == false)
-            {
-                Console.WriteLine("Error: Looks like you didnt build PrometheOSXbe.");
-                return;
-            }
-
-            Console.WriteLine("Packing PrometheOS Xbe...");
-            var promethosxbeBank = CompressBank(promethosXbePath, (768 - 36) * 1024);
-
-            var firmware = new byte[2 * 1024 * 1024];
-            Array.Copy(promethosxbeBank, 0, firmware, 0x140000, (768 - 36) * 1024);
-            Array.Copy(prometheos, 0, firmware, 0x100000, prometheos.Length);
-
-            var buildPath = Path.Combine(slnFolder, "..\\Build");
-            Directory.CreateDirectory(buildPath);
-            File.WriteAllBytes(Path.Combine(buildPath, $"prometheos-{modchip.ToLower()}.bin"), firmware);
-        }
-
-        public static void FtpXeniumOS()
-        {
-            var slnFolder = Utility.GetSlnFolder();
-            var buildPath = Path.Combine(slnFolder, "Build");
-
-            try
-            {
-                using (FtpClient ftpClient = new FtpClient("ftp://xenium.local", "admin", "Blu3P3t3r!"))
-                {
-                    ftpClient.Connect();
-                    ftpClient.UploadFile(Path.Combine(buildPath, "xeniumos.bin"), "/home/admin/xenium-programmer/xenium-bin/xeniumos.bin");
-                    Console.WriteLine($"File uploaded successfully");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error uploading file: {ex.Message}");
-            }
+            PackageModxoVariant(prometheos, "bsx", modchip, defaultFamilyId);
         }
     }
 }
